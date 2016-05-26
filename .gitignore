@@ -1,0 +1,4 @@
+*.fits
+*.fit
+*.*~
+Exploration/.ipynb_checkpoints
