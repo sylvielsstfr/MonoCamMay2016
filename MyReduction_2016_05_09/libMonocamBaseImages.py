@@ -173,7 +173,48 @@ def overscan_trim_and_sigma_clip_median(image_list, clip_baseline_func=med_over_
 #-------------------------------------------------------------------------------------------------
 
 
-					
+
+#-------------------------------------------------------------------------------------------
+def ShowImagesSet(ccdlist):
+    '''
+    Shows the whole set of CCD images
+     - inputs argument:
+       path : path of the fits file
+       filename of the fits file
+     - output the images of the whole CCD   
+    '''
+     
+    NX=8 # number of images along the horizontal axis
+    NY=2 # number of images along the vertical axis
+    
+    f, axarr = plt.subplots(NY,NX,sharex='col', sharey='row',figsize=(15,15)) # figure organisation
+    
+    f.subplots_adjust(hspace=0.125,wspace=0.1)
+
+    for index in range(NB_OF_CHANNELS):  
+        ix=index%8
+        iy=index/8
+        image_data = ccdlist[index].data
+        V_MIN=image_data.flatten().min()
+        V_MAX=image_data.flatten().max()
+        im=axarr[iy,ix].imshow(image_data,vmin=V_MIN,vmax=V_MAX)  # plot the image
+        if ix==0 and iy==0:
+            im0=im
+        plottitle='channel {}'.format(index+1)
+        axarr[iy,ix].set_title(plottitle)
+    
+    title='Master Biases'
+    cax = f.add_axes([0.95, 0.12, 0.03, 0.78]) # [left,bottom,width,height]    
+    f.colorbar(im0, cax=cax)
+   
+    plt.suptitle(title,size=16)
+    plt.savefig('viewccd.pdf', bbox_inches='tight')
+#----------------------------------------------------------------------------------------
+
+
+
+#-------------------------------------------------------------------------------------------------
+#   Main to test the library					
 #-------------------------------------------------------------------------------------------------
 if __name__ == "__main__":
 	in_masterbias_filename='masterbias1.fits'
