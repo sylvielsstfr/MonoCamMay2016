@@ -178,10 +178,24 @@ def overscan_trim_and_sigma_clip_median(image_list, clip_baseline_func=med_over_
     return combo
 #-------------------------------------------------------------------------------------------------
 
-
+#-------------------------------------------------------------------------------------------------
+def MinMaxMeanStd(ccdlist):
+    '''
+    '''
+    themin=np.zeros(NB_OF_CHANNELS)
+    themax=np.zeros(NB_OF_CHANNELS)
+    themean=np.zeros(NB_OF_CHANNELS)
+    therms=np.zeros(NB_OF_CHANNELS)
+    
+    for index in range(NB_OF_CHANNELS):  
+        image_data = ccdlist[index].data[10:2000,:]
+        themin[index],themax[index],themean[index],therms[index]=imstats(image_data)
+    
+    return themin.min(),themax.max(),themean.mean(),therms.mean()
+#-------------------------------------------------------------------------------------------------    
 
 #-------------------------------------------------------------------------------------------
-def ShowImagesSet(ccdlist,maintitle,datafile,figfile):
+def ShowImagesSet(ccdlist,maintitle,datafile,figfile,nbsig=3.):
     '''
     Shows the whole set of CCD images
      - inputs argument:
@@ -197,13 +211,15 @@ def ShowImagesSet(ccdlist,maintitle,datafile,figfile):
     
     f.subplots_adjust(hspace=0.125,wspace=0.1)
 
+    mn,mx,mm,mr=MinMaxMeanStd(ccdlist)
+    V_MIN=mm-nbsig*mr
+    V_MAX=mm+nbsig*mr
     for index in range(NB_OF_CHANNELS):  
         ix=index%8
         iy=index/8
         image_data = ccdlist[index].data
-        V_MIN=image_data.flatten().min()
-        V_MAX=image_data.flatten().max()
-        im=axarr[iy,ix].imshow(image_data,vmin=V_MIN,vmax=V_MAX)  # plot the image
+        
+        im=axarr[iy,ix].imshow(image_data,vmin=V_MIN,vmax=V_MAX,cmap='gray')  # plot the image
         if ix==0 and iy==0:
             im0=im
         plottitle='channel {}'.format(index+1)
@@ -218,7 +234,7 @@ def ShowImagesSet(ccdlist,maintitle,datafile,figfile):
 #----------------------------------------------------------------------------------------
 
 #---------------------------------------------------------------------------
-def ShowHistoSet(ccdlist,maintitle,datafile,figfile):
+def ShowHistoSet(ccdlist,maintitle,datafile,figfile,nbsig=3.):
     '''
     Shows the whole set of CCD histograms
      - inputs argument:
@@ -230,8 +246,11 @@ def ShowHistoSet(ccdlist,maintitle,datafile,figfile):
     
     NX=4 # number of images along the horizontal axis
     NY=4 # number of images along the vertical axis
-    BIASMIN=-10.0
-    BIASMAX=10.0
+    
+    mn,mx,mm,mr=MinMaxMeanStd(ccdlist)
+    V_MIN=mm-nbsig*mr
+    V_MAX=mm+nbsig*mr
+    
     BINWIDTH=0.25
     f, axarr = plt.subplots(NY,NX,figsize=(20,20)) # figure organisation
     #f, axarr = plt.subplots(NX,NY,sharex=True, sharey=True,figsize=(20,20))
@@ -240,12 +259,12 @@ def ShowHistoSet(ccdlist,maintitle,datafile,figfile):
     for index in range(NB_OF_CHANNELS):  
         ix=index%4
         iy=index/4
-        image_data = image_data = ccdlist[index].data
+        image_data = ccdlist[index].data
         data=image_data.flatten()
         axarr[iy,ix].hist(data,bins=np.arange(min(data), max(data) + BINWIDTH, BINWIDTH),facecolor='blue', alpha=0.75,log=True)  # plot the image
         #axarr[iy,ix].hist(data,bins=np.arange(min(data), max(data) + BINWIDTH, BINWIDTH),facecolor='blue', alpha=0.70,log=False)  # plot the image
         plottitle='channel {}'.format(index+1)
-        axarr[iy,ix].set_xlim(BIASMIN,BIASMAX)
+        axarr[iy,ix].set_xlim(V_MIN,V_MAX)
         axarr[iy,ix].set_title(plottitle)
         axarr[iy,ix].set_xlabel('ADU')
         axarr[iy,ix].grid(True)
