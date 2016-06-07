@@ -13,11 +13,17 @@ import numpy as np
 from astropy.io import fits
 from astropy import units as u
 import ccdproc
+from astropy.modeling import models
 
 import os
 
+import bottleneck as bn  # numpy's masked median is slow...really slow (in version 1.8.1 and lower)
+
 NB_OF_CHANNELS=16
 
+#--------------------------------------------------------------------------
+imstats = lambda dat: (dat.min(), dat.max(), dat.mean(), dat.std())
+scaling_func= lambda arr: 1/np.ma.average(arr)
 
 #-------------------------------------------------------------------------------------
 def BuildFilelist(path,name,ext='.fits',start=1,stop=99):
@@ -34,7 +40,7 @@ def BuildFilelist(path,name,ext='.fits',start=1,stop=99):
     '''
     filelist = []
     for num in range(start,stop+1,1):
-        strnum=biasnumberstr= '{0:02d}'.format(num)  # python >= 2.6
+        strnum= '{0:02d}'.format(num)  # python >= 2.6
         filename=name+strnum+ext
         fullfilename=os.path.join(path,filename)
         filelist.append(fullfilename)
@@ -135,7 +141,7 @@ def avg_over_images(masked_arr, axis=0):
     """
     Calculate average pixel value along specified axis
     """
-    return ma.mean(masked_arr, axis=axis)
+    return np.ma.mean(masked_arr, axis=axis)
 #-------------------------------------------------------------------------------------------------
 
 
@@ -175,7 +181,7 @@ def overscan_trim_and_sigma_clip_median(image_list, clip_baseline_func=med_over_
 
 
 #-------------------------------------------------------------------------------------------
-def ShowImagesSet(ccdlist):
+def ShowImagesSet(ccdlist,maintitle,datafile,figfile):
     '''
     Shows the whole set of CCD images
      - inputs argument:
@@ -203,13 +209,55 @@ def ShowImagesSet(ccdlist):
         plottitle='channel {}'.format(index+1)
         axarr[iy,ix].set_title(plottitle)
     
-    title='Master Biases'
+    title=maintitle+'inputfile {}'.format(datafile)
     cax = f.add_axes([0.95, 0.12, 0.03, 0.78]) # [left,bottom,width,height]    
     f.colorbar(im0, cax=cax)
    
     plt.suptitle(title,size=16)
-    plt.savefig('viewccd.pdf', bbox_inches='tight')
+    plt.savefig(figfile, bbox_inches='tight')
 #----------------------------------------------------------------------------------------
+
+#---------------------------------------------------------------------------
+def ShowHistoSet(ccdlist,maintitle,datafile,figfile):
+    '''
+    Shows the whole set of CCD histograms
+     - inputs argument:
+       path : path of the fits file
+       filename of the fits file
+     - output the images of the whole CCD   
+    '''
+   
+    
+    NX=4 # number of images along the horizontal axis
+    NY=4 # number of images along the vertical axis
+    BIASMIN=-10.0
+    BIASMAX=10.0
+    BINWIDTH=0.25
+    f, axarr = plt.subplots(NY,NX,figsize=(20,20)) # figure organisation
+    #f, axarr = plt.subplots(NX,NY,sharex=True, sharey=True,figsize=(20,20))
+    f.subplots_adjust(hspace=0.5,wspace=0.5)
+
+    for index in range(NB_OF_CHANNELS):  
+        ix=index%4
+        iy=index/4
+        image_data = image_data = ccdlist[index].data
+        data=image_data.flatten()
+        axarr[iy,ix].hist(data,bins=np.arange(min(data), max(data) + BINWIDTH, BINWIDTH),facecolor='blue', alpha=0.75,log=True)  # plot the image
+        #axarr[iy,ix].hist(data,bins=np.arange(min(data), max(data) + BINWIDTH, BINWIDTH),facecolor='blue', alpha=0.70,log=False)  # plot the image
+        plottitle='channel {}'.format(index+1)
+        axarr[iy,ix].set_xlim(BIASMIN,BIASMAX)
+        axarr[iy,ix].set_title(plottitle)
+        axarr[iy,ix].set_xlabel('ADU')
+        axarr[iy,ix].grid(True)
+        #axarr[iy,ix].set_yscale('log')
+
+    plt.yscale('log')
+    title=maintitle+ ' from file {}'.format(datafile)
+    plt.suptitle(title,size=16)
+    plt.savefig(figfile, bbox_inches='tight')
+
+#------------------------------------------------------------------------
+
 
 
 
