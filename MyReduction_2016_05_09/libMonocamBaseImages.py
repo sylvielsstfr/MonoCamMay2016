@@ -219,7 +219,7 @@ def ShowImagesSet(ccdlist,maintitle,datafile,figfile,nbsig=3.):
         iy=index/8
         image_data = ccdlist[index].data
         
-        im=axarr[iy,ix].imshow(image_data,vmin=V_MIN,vmax=V_MAX,cmap='gray')  # plot the image
+        im=axarr[iy,ix].imshow(image_data,vmin=V_MIN,vmax=V_MAX,cmap='rainbow',interpolation="nearest")  # plot the image
         if ix==0 and iy==0:
             im0=im
         plottitle='channel {}'.format(index+1)

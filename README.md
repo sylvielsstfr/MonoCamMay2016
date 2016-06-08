@@ -2,9 +2,26 @@
 #----------------
 
 - created May 26th 2016
+- Updated June 8th 2016
 - author Sylvie Dagoret-Campagne
 
 
+## requirements
+- numpy 
+- matplotlib
+- astropy
+- ccdproc
+
+(may be pandas)
+
+
+And DS9
+- pyds9
+
+
+I use python for Anaconda, python version 2.7. For me:
+
+- source activate pyastrophys
 
 
 
@@ -15,19 +32,56 @@
 ---------------
 Basic ipython notebook  to have a look to the data
 
+#### Look at single files
+
+- ExploreBias.ipynb		
+- ExploreDark.ipynb		
+- ExploreFlats.ipynb		
+- ExploreImages.ipynb		
+- ExploreProjector.ipynb	
+- ExploreSkyFlats.ipynb
 
 
-## requirements
-- numpy 
-- matplotlib
-- astropy
-(may be pandas)
+#### scan over files of the same type
 
-I use python for Anaconda, python version 2.7. For me:
+- ScanOverBiasFiles.ipynb
+- ScanOverDarkFiles.ipynb
+- ScanOverFlats.ipynb
+- ScanOverSkyFlats.ipynb
 
-- source activate pyastrophys
+
+#### tools
+
+- MakeFileList.ipynb
+- SaveFitFile.ipynb
+- ShowFileInDS9.ipynb
+- TestFitHisto_v0.ipynb
+
+
+### MyReduction_2016_05_09
  
+#### very important tasks for standard CCD reduction:
 
+- MONOCAMCCDRed.ipynb --> Produce the Master bias and the Master Darks
+- MONOCAMCCDRedWithSkyFlats.ipynb __> Produce the Master Flat with Flat Sky
+
+
+#### Python Library
+
+- libMonocamBaseImages.py
+
+#### Example to produce a Master Bias and Master Dark
+
+
+- Build_MasterBias.ipynb		
+- Build_MasterDark.ipynb		
+
+#### Utility tools
+
+- ShowFileInDS9.ipynb
+- ViewSingleFitsFile.ipynb
+- WorkWithDS9.ipynb
+- grab_files.ipynb
 
 
 ## To get the whole Package
