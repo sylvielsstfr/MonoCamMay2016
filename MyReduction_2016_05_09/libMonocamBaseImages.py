@@ -259,7 +259,7 @@ def ShowHistoSet(ccdlist,maintitle,datafile,figfile,nbsig=3.):
     for index in range(NB_OF_CHANNELS):  
         ix=index%4
         iy=index/4
-        image_data = ccdlist[index].data
+        image_data = ccdlist[index].data[0:2000,:]
         data=image_data.flatten()
         axarr[iy,ix].hist(data,bins=np.arange(min(data), max(data) + BINWIDTH, BINWIDTH),facecolor='blue', alpha=0.75,log=True)  # plot the image
         #axarr[iy,ix].hist(data,bins=np.arange(min(data), max(data) + BINWIDTH, BINWIDTH),facecolor='blue', alpha=0.70,log=False)  # plot the image
@@ -277,7 +277,51 @@ def ShowHistoSet(ccdlist,maintitle,datafile,figfile,nbsig=3.):
 
 #------------------------------------------------------------------------
 
+#---------------------------------------------------------------------------
+def ShowHistoSetFixedBound(ccdlist,maintitle,datafile,figfile,Vmin=0.5,Vmax=1.5):
+    '''
+    Shows the whole set of CCD histograms
+     - inputs argument:
+       path : path of the fits file
+       filename of the fits file
+     - output the images of the whole CCD   
+    '''
+   
+    
+    NX=4 # number of images along the horizontal axis
+    NY=4 # number of images along the vertical axis
+    
+    #mn,mx,mm,mr=MinMaxMeanStd(ccdlist)
+    #V_MIN=mm-nbsig*mr
+    #V_MAX=mm+nbsig*mr
+    V_MIN=Vmin
+    V_MAX=Vmax
+    
+    BINWIDTH=(Vmax-Vmin)/500.
+    f, axarr = plt.subplots(NY,NX,figsize=(20,20)) # figure organisation
+    #f, axarr = plt.subplots(NX,NY,sharex=True, sharey=True,figsize=(20,20))
+    f.subplots_adjust(hspace=0.5,wspace=0.5)
 
+    for index in range(NB_OF_CHANNELS):  
+        ix=index%4
+        iy=index/4
+        image_data = ccdlist[index].data[0:2000,:]
+        data=image_data.flatten()
+        axarr[iy,ix].hist(data,bins=np.arange(min(data), max(data) + BINWIDTH, BINWIDTH),facecolor='blue', alpha=0.75,log=True)  # plot the image
+        #axarr[iy,ix].hist(data,bins=np.arange(min(data), max(data) + BINWIDTH, BINWIDTH),facecolor='blue', alpha=0.70,log=False)  # plot the image
+        plottitle='channel {}'.format(index+1)
+        axarr[iy,ix].set_xlim(V_MIN,V_MAX)
+        axarr[iy,ix].set_title(plottitle)
+        axarr[iy,ix].set_xlabel('ADU')
+        axarr[iy,ix].grid(True)
+        #axarr[iy,ix].set_xscale('log')
+
+    plt.yscale('log')
+    title=maintitle+ ' from file {}'.format(datafile)
+    plt.suptitle(title,size=16)
+    plt.savefig(figfile, bbox_inches='tight')
+
+#------------------------------------------------------------------------
 
 
 #-------------------------------------------------------------------------------------------------
