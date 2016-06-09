@@ -73,17 +73,17 @@ def SaveCCDListIntoFitsFile(ccdlist,outfitsfilename,meta,imagetyp='master_bias')
 	header['IMAGETYP']=imagetyp
 	#header['DATE-ANA']=date : this info should already be in the input header
 
-	print 'header to be written in file ::'
-	print '-------------------------------'
-	header
+	#print 'header to be written in file ::'
+	#print '-------------------------------'
+	#header
 
 	index=0 # channel index
 	# loop on CCD channels
 	for ccdchan in ccdlist :
 	    index=index+1
-	    hd=ccdchan.header
-	    print index
-	    print hd
+	    #hd=ccdchan.header
+	    #print index
+	    #print hd
 	    img=ccdchan.data
 	    hdul.append(fits.ImageHDU(data=img)) 
 
