@@ -28,9 +28,10 @@ I use python for Anaconda, python version 2.7. For me:
 ## Directories
 ------------
 
-### Exploration
+### Directory 1 : Exploration
 ---------------
-Basic ipython notebook  to have a look to the data
+Basic ipython notebook  to have a quick look to the data.
+Not a detailed analysis
 
 #### Look at single files
 
@@ -58,15 +59,38 @@ Basic ipython notebook  to have a look to the data
 - TestFitHisto_v0.ipynb
 
 
-### MyReduction_2016_05_09
+### Directory 2 : MyReduction_2016_05_09
  
 #### very important tasks for standard CCD reduction:
 
-- MONOCAMCCDRed.ipynb --> Produce the Master bias and the Master Darks
-- MONOCAMCCDRedWithSkyFlats.ipynb __> Produce the Master Flat with Flat Sky
+- 2.a) MONOCAMCCDRed.ipynb --> Produce the Master bias and the Master Darks
+- 2.b) MONOCAMCCDRedWithSkyFlats.ipynb --> Produce the Master Flat with Flat Sky
+
+- 2.c) Work with the scientific images without assembling them
+
+-- MONOCAMCCDRedImages_HD158485_grat.ipynb
+-- MONOCAMCCDRedImages_HD159222_grat.ipynb
+-- MONOCAMCCDRedImages_HD163466_grat.ipynb
 
 
-#### Python Library
+- 2.d) Does the images assembly into a single 4K x 4K image: important to reconstruct the spectrum
+
+-- ImageAssembler_HD158485_grat.ipynb
+-- ImageAssembler_HD159222_grat.ipynb
+-- ImageAssembler_HD163466_grat.ipynb
+
+
+- 2.e) To study the sky background and check if we understand the amplifier gain
+
+-- SkyBackgroundAndGain_HD158485_grat.ipynb
+-- SkyBackgroundAndGain_HD159222_grat.ipynb
+-- SkyBackgroundAndGain_HD163466_grat.ipynb
+
+
+
+#### Python Library:
+
+provide services and tools to ipython notebooks:
 
 - libMonocamBaseImages.py
 
