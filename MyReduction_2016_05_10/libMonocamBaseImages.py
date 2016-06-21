@@ -38,7 +38,7 @@ imstats = lambda dat: (dat.min(), dat.max(), dat.mean(), dat.std())
 scaling_func= lambda arr: 1/np.ma.average(arr)
 
 #-------------------------------------------------------------------------------------
-def BuildFilelist(path,name,ext='.fits',start=1,stop=99):
+def BuildFilelist(path,name,ext='.fits',start=1,stop=99,nbchar=2):
     '''
     Make the list of filenames required by ccdproc
     
@@ -52,7 +52,14 @@ def BuildFilelist(path,name,ext='.fits',start=1,stop=99):
     '''
     filelist = []
     for num in range(start,stop+1,1):
-        strnum= '{0:02d}'.format(num)  # python >= 2.6
+      
+        if nbchar==1:
+            strnum=biasnumberstr= '{0:01d}'.format(num)  # python >= 2.6
+        elif nbchar==2:
+            strnum=biasnumberstr= '{0:02d}'.format(num)  # python >= 2.6
+        else:
+            strnum=biasnumberstr= '{0:03d}'.format(num)  # python >= 2.6
+            
         filename=name+strnum+ext
         fullfilename=os.path.join(path,filename)
         filelist.append(fullfilename)
