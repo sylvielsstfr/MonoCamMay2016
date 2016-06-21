@@ -19,7 +19,19 @@ import os
 
 import bottleneck as bn  # numpy's masked median is slow...really slow (in version 1.8.1 and lower)
 
+# number of amplifiers
 NB_OF_CHANNELS=16
+
+# how to map the amplifier images into a single image
+# from left to right, top to bottom
+# - chan  : means the original channel
+# - chflip: means the original channel has been fliped up-down
+#
+#   chan8   chan7     chan6    chan5     chan4     chan3     chan2    chan1 
+#   chflip9 chflip10  chflip11 chflip12  chflip13  chflip14  chflip15 chflip 16
+
+Channel_mapping = [8,7,6,5,4,3,2,1,9,10,11,12,13,14,15,16] # order by which they are concatenated
+Channel_flipupdo = [False,False,False,False,False,False,False,False,True,True,True,True,True,True,True,True]
 
 #--------------------------------------------------------------------------
 imstats = lambda dat: (dat.min(), dat.max(), dat.mean(), dat.std())
@@ -327,7 +339,41 @@ def ShowHistoSetFixedBound(ccdlist,maintitle,datafile,figfile,Vmin=0.5,Vmax=1.5)
 
 #------------------------------------------------------------------------
 
-
+#---------------------------------------------------------------------------------
+def MakeSingleImage(image_list):
+    '''
+     This function use  list off NB_OF_CHANNELS alltogether and map them in a single image
+     
+     Channel_mapping = [8,7,6,5,4,3,2,1,9,10,11,12,13,14,15,16] # order by which they are concatenated
+     Channel_flipupdo     
+     
+     input : 
+        -  image_list: list of ccdproc
+      
+    '''
+         
+    for index in range(NB_OF_CHANNELS):  
+       
+        goodindex=Channel_mapping[index]-1
+        if not Channel_flipupdo[index]:
+            image_data = image_list[goodindex].data[0:2000,:] # cut the image properly
+        else:
+            image_data = np.flipud(np.fliplr(image_list[goodindex].data[0:2000,:]))
+            
+        if index == 0:
+            imageup =image_data
+        elif index >=1 and index <=7:
+            imageup = np.concatenate((imageup,image_data),axis=1)
+        elif index ==8 :
+            imagedo = image_data
+        else:
+            imagedo = np.concatenate((imagedo,image_data),axis=1)
+            
+    full_image=np.concatenate((imageup,imagedo),axis=0)
+    return full_image
+#------------------------------------------------------------------------------    
+    
+    
 #-------------------------------------------------------------------------------------------------
 #   Main to test the library					
 #-------------------------------------------------------------------------------------------------
