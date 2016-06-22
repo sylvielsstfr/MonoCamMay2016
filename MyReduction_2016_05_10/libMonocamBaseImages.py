@@ -290,6 +290,7 @@ def ShowHistoSet(ccdlist,maintitle,datafile,figfile,nbsig=3.):
         axarr[iy,ix].set_title(plottitle)
         axarr[iy,ix].set_xlabel('ADU')
         axarr[iy,ix].grid(True)
+        axarr[iy,ix].set_ylim(1.,1e8)
         axarr[iy,ix].legend(loc='best')
         #axarr[iy,ix].set_yscale('log')
 
@@ -330,13 +331,19 @@ def ShowHistoSetFixedBound(ccdlist,maintitle,datafile,figfile,Vmin=0.5,Vmax=1.5)
         iy=index/4
         image_data = ccdlist[index].data[0:2000,:]
         data=image_data.flatten()
-        axarr[iy,ix].hist(data,bins=np.arange(Vmin, Vmax + BINWIDTH, BINWIDTH),facecolor='blue', alpha=0.75,log=True)  # plot the image
+        themean=np.mean(data)
+        therms=np.std(data)
+        label="m = {:2.2f} $\sigma$ = {:2.2f}".format(themean,therms)
+        
+        axarr[iy,ix].hist(data,bins=np.arange(Vmin, Vmax + BINWIDTH, BINWIDTH),facecolor='blue', alpha=0.75,log=True,label=label)  # plot the image
         #axarr[iy,ix].hist(data,bins=np.arange(min(data), max(data) + BINWIDTH, BINWIDTH),facecolor='blue', alpha=0.70,log=False)  # plot the image
         plottitle='channel {}'.format(index+1)
         axarr[iy,ix].set_xlim(V_MIN,V_MAX)
+        axarr[iy,ix].set_ylim(1.,1e8)
         axarr[iy,ix].set_title(plottitle)
         axarr[iy,ix].set_xlabel('ADU')
         axarr[iy,ix].grid(True)
+        axarr[iy,ix].legend(loc='best')
         #axarr[iy,ix].set_xscale('log')
 
     plt.yscale('log')
