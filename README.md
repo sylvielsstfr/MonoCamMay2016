@@ -87,6 +87,63 @@ Not a detailed analysis
 -- SkyBackgroundAndGain_HD163466_grat.ipynb
 
 
+### Directory 3 : MyReduction_2016_05_10
+
+
+### Directory 4 : MyReduction_2016_05_11
+
+
+#### to make the CCD reduction
+-- MONOCAMCCDRed.ipynb
+-- MONOCAMCCDRedImages_HD158485_grat.ipynb
+-- MONOCAMCCDRedImages_HD158485_grat_part2.ipynb
+-- MONOCAMCCDRedImages_HD163466_grat.ipynb
+-- MONOCAMCCDRedImages_HD163466_none.ipynb
+-- MONOCAMCCDRedWithSkyFlats.ipynb
+
+#### Utilities to work on PSF
+
+##### Working tools for PSF
+-- ExtractPSFExtractor_From_HD158485_grat.ipynb
+-- ExtractPSFExtractor_From_HD163466_grat.ipynb
+-- ExtractPSFExtractor_From_HD163466_none.ipynb
+
+#### Old tools for PSF
+
+-- ExtractPSF_From_HD158485_grat.ipynb
+-- ExtractPSF_From_HD163466_none-v2.ipynb
+
+#### Loop on all files to get the PSF
+-- FindOptPSF.ipynb
+-- FindOptPSF_HD158485_grat.ipynb
+-- FindOptPSF_HD163466_grating.ipynb
+
+
+#### Extract the spectrum from Ronchi Grating
+-- ExtractSpectrum_From_HD158485_grat.ipynb
+-- ExtractSpectrum_From_HD163466_grat.ipynb
+
+
+
+#### some tools
+
+##### On astropy table
+-- DumpFitsTableToAscii.ipynb
+-- ShowPSFTable.ipynb
+
+
+##### Conversion UTC time to azimuth, elevation, airmass
+
+-- ShowStarAirMass_HD158485_grat_2016-05-11.ipynb
+-- StarSkyElevation_HD158485_grat_2016-05-11.ipynb
+
+
+##### DS9, not used
+
+ViewSingleFitsFile.ipynb
+
+ 
+
 
 #### Python Library:
 
