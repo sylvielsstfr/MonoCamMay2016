@@ -44,6 +44,8 @@ from datetime import datetime, timedelta
 
 from scipy.interpolate import UnivariateSpline
 
+import sys
+
 
 import libMonocamBaseImages           # my tool library written to do that CCD reduction
 
@@ -118,6 +120,21 @@ def DiffAmplitudes(sp1,sp2,gain,basebg):
 if __name__ == '__main__':
 
 #-------------------------------------------------------------
+ 
+    print 'Number of arguments:', len(sys.argv), 'arguments.'
+    print 'Argument List:', str(sys.argv)
+
+    for idx,arg in enumerate(sys.argv):
+        if idx==1:
+            num_arg=arg
+        else:
+            num_arg=None
+            
+    print 'number required = ', num_arg 
+    
+    if not num_arg.isdigit():
+        num_arg=None           
+
     now=datetime.utcnow()  # choose UTC time
     datestr=str(now)
     print 'standard date format for the analysis :',datestr
@@ -132,7 +149,10 @@ if __name__ == '__main__':
 
     # input file : reduced and assembled images
     #--------------
-    fileindex=107;
+    if num_arg==None:
+        fileindex=107;
+    else:
+        fileindex=int(num_arg)
     
     object_name='HD158485_grat_'+str(fileindex)
     path='./HD158485_grat'
@@ -157,7 +177,7 @@ if __name__ == '__main__':
 #----------------------------------------------------------------------------
     RotationAngleOptimisation=False
     BackgroundSubtractionFlag=False
-    CropLittleStarFlag=False
+    CropLittleStarFlag=True
 
 #--------------------------------------------------------------------------------
 
@@ -180,7 +200,7 @@ if __name__ == '__main__':
     fig, ax = plt.subplots(figsize=(8, 8))
     img=ax.imshow(ccd_chan,vmin=0,vmax=50.)
     plt.title(object_name)
-    plt.tight_layout()
+    #plt.tight_layout()
     plt.colorbar(img)
     plt.grid(True)
     plt.show()
@@ -246,7 +266,14 @@ if __name__ == '__main__':
 
     if RotationAngleOptimisation:
         dflux=flux-flux.max()
+        fig, ax = plt.subplots(figsize=(8, 8))
         plt.plot(rotation_angle_test,dflux)
+        plt.title(object_name)
+        #plt.tight_layout()
+        plt.colorbar(img)
+        plt.grid(True)
+        plt.show()
+        
 
 
 # In[883]:
@@ -284,7 +311,7 @@ if __name__ == '__main__':
     imax,jmax = np.unravel_index(rotated_image.argmax(), rotated_image.shape)
     check_region=np.copy(rotated_image[imax-wcheck: imax+wcheck,510:4400])  # extract the region
  
-    fig, ax = plt.subplots(figsize=(40, 40))
+    fig, ax = plt.subplots(figsize=(20, 3))
     ax.imshow(check_region,vmin=0,vmax=50)
     plt.show()    
 
@@ -348,12 +375,12 @@ if __name__ == '__main__':
 
     # check the central region is OK
     # -------------------------------
-    fig, ax = plt.subplots(figsize=(40, 40))
+    fig, ax = plt.subplots(figsize=(10, 10))
     ax.imshow(rotated_image,vmin=0,vmax=50.)
     ax.plot([500, 4830], [imax-w, imax-w], color='y', linestyle='-', linewidth=2)
     ax.plot([500, 4830], [imax+w, imax+w], color='y', linestyle='-', linewidth=2)
     plt.title(object_name)
-    plt.tight_layout()
+    #plt.tight_layout()
     plt.show()
 
 #----------------------------------------------------------------------------------
@@ -383,7 +410,7 @@ if __name__ == '__main__':
 
     # show the original spectrum region
     #---------------------------------
-    fig, ax = plt.subplots(figsize=(25, 25))
+    fig, ax = plt.subplots(figsize=(20, 20))
     ax.imshow(SpectrumRegion,vmin=0,vmax=100.)
     ax.tick_params(axis='x', labelsize=30)
     ax.tick_params(axis='y', labelsize=10)
@@ -422,7 +449,7 @@ if __name__ == '__main__':
 
     # idem but with a zoom
     #----------------------
-    fig, ax = plt.subplots(figsize=(40, 40))
+    fig, ax = plt.subplots(figsize=(20, 20))
     ax.imshow(SpectrumRegionNew[:,300:4500],vmin=0,vmax=50.)
     ax.tick_params(axis='x', labelsize=30)
     ax.tick_params(axis='y', labelsize=10)
@@ -468,7 +495,7 @@ if __name__ == '__main__':
 
     # check the liitle star is erased
     #---------------------------------
-    fig, ax = plt.subplots(figsize=(40, 40))
+    fig, ax = plt.subplots(figsize=(20, 20))
     ax.imshow(SpectrumRegionNew[:,3000:4500],vmin=0,vmax=100.)
     ax.tick_params(axis='x', labelsize=30)
     ax.tick_params(axis='y', labelsize=10)
@@ -638,7 +665,7 @@ if __name__ == '__main__':
     ax.plot(BackgUp,color='m',label='background from up band')
     ax.plot(BackgDo,color='b',label='background of down band')
     ax.plot(BackgMi,color='r',label='background of min band')
-    plt.ylim(0,4.5)
+    #plt.ylim(0,4.5)
     plt.legend()
     plt.show()
 
@@ -661,7 +688,7 @@ if __name__ == '__main__':
     fig, ax = plt.subplots(figsize=(20, 5))
     ax.plot(BackgSpecFinal,color='r',label='Final Background')
     plt.legend()
-    plt.ylim(0,4.5)
+    #plt.ylim(0,4.5)
     plt.show()
 
 #--------------------------------------------------------------------------------
@@ -673,7 +700,7 @@ if __name__ == '__main__':
 
     # Check the FinalSpectrumRegion
     #----------------------------------------
-    fig, ax = plt.subplots(figsize=(40, 40))
+    fig, ax = plt.subplots(figsize=(20, 20))
     ax.imshow(FinalSpectrumRegion,vmin=0,vmax=50.)
     plt.title(object_name)
     plt.tight_layout()
@@ -811,7 +838,7 @@ if __name__ == '__main__':
     spec2_croped=spec2[0:N]
     specsum=0.5*(spec1_croped+spec2_croped)-avspecbg
 
-    fig, ax = plt.subplots(figsize=(20, 8))
+    fig, ax = plt.subplots(figsize=(15, 8))
     ax.plot(specsum)
 
 
@@ -934,7 +961,7 @@ if __name__ == '__main__':
 
 
     # Plot the calibrated experimental spectrum
-    plt.figure(figsize=(20.,8.))
+    plt.figure(figsize=(15.,8.))
     plt.plot(specsum_wavelength,specsum)
     plt.title('Spectrum reconstructed with Monocam and Ronchi Grating',fontsize=30)
     plt.xlabel('$\lambda$ (nm)',fontsize=20)
@@ -999,7 +1026,7 @@ if __name__ == '__main__':
 
     basefigfile=""
 
-    plt.figure(figsize=(20,10))
+    plt.figure(figsize=(15,8))
     plt.plot(wavelength_sed,SED1,label='calspec SED',color='k')
     plt.plot(wavelength_sed,SED2,label='with CCD-QE',color='b')
     plt.plot(wavelength_sed,SED3,label='with CCD-QE and atmosphere',color='r')
@@ -1016,7 +1043,7 @@ if __name__ == '__main__':
 
 
 
-    plt.figure(figsize=(20.,10.))
+    plt.figure(figsize=(15.,8.))
     plt.plot(specsum_wavelength,specsum,label='data',color='b')
     plt.plot(wavelength_sed,SED5*3e14,label='predicted SED(ccd,atm,opt)',color='r')
     thetitle='Spectrum reconstructed with Monocam and Ronchi Grating for '+object_name
