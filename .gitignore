@@ -2,4 +2,6 @@
 *.fit
 *.*~
 *.pdf
+*.jpg
+*.gif
 Exploration/.ipynb_checkpoints
