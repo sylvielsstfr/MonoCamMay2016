@@ -158,6 +158,10 @@ if __name__ == '__main__':
     path='./HD158485_grat'
     basefilename='AssScImHD158485_grat_'+str(fileindex)+'.fits' # check master bias
     filename=os.path.join(path,basefilename)
+   
+    
+    night_name='20160509'    
+    
     
     # output files
     #-------------
@@ -177,7 +181,9 @@ if __name__ == '__main__':
 #----------------------------------------------------------------------------
     RotationAngleOptimisation=False
     BackgroundSubtractionFlag=False
-    CropLittleStarFlag=True
+    BackgroundSubtractionFlag1=False  # must be opposite
+    BackgroundSubtractionFlag2=True
+    CropLittleStarFlag=False
 
 #--------------------------------------------------------------------------------
 
@@ -464,7 +470,7 @@ if __name__ == '__main__':
     ymax3,xmax3=np.where(SpectrumRegionNew==SpectrumRegionNew.max())
     print ymax3,xmax3
 
-    littlestarsize=10    # be carefull the extinction of the tiny star should not be that big
+    littlestarsize=15    # be carefull the extinction of the tiny star should not be that big
 
 
     # total size the of Spectrum region in X and Y
@@ -632,9 +638,10 @@ if __name__ == '__main__':
 
 
 #---------------------------------------------------------------------------------
-# ## Extract up and down bands to compute the background
+# ## Extract up and down bands to compute the 
+#--------------------------------------------------------------------------
 
-
+    #Background method 1 : 2D subtraction
 
     SelectedBackgroundUpRegion=np.copy(rotated_image[imax-wsel-100: imax+wsel-100,:])
     SelectedBackgroundDownRegion=np.copy(rotated_image[imax-wsel+100: imax+wsel+100,:])
@@ -647,6 +654,7 @@ if __name__ == '__main__':
     ax1.imshow(SelectedBackgroundUpRegion,vmin=0,vmax=10.)
     ax2.imshow(SelectedBackgroundDownRegion,vmin=0,vmax=10.)
     ax3.imshow(SelectedBackgroundMinRegion,vmin=0,vmax=10.)
+    plt.title('Final Background method 1')
     plt.tight_layout()
     plt.show()
 
@@ -665,37 +673,98 @@ if __name__ == '__main__':
     ax.plot(BackgUp,color='m',label='background from up band')
     ax.plot(BackgDo,color='b',label='background of down band')
     ax.plot(BackgMi,color='r',label='background of min band')
+    plt.title('Final Background method 1')
     #plt.ylim(0,4.5)
     plt.legend()
     plt.show()
 
-    FinalBackground=SelectedBackgroundMinRegion+((m1+m2)/2-m0)
+    FinalBackground1=SelectedBackgroundMinRegion+((m1+m2)/2-m0)
 
 
 
     # plot the final background region
     # ---------------------------------------
     fig, ax1 = plt.subplots(1,1,figsize=(20, 2))
-    ax1.imshow(FinalBackground,vmin=0,vmax=10.)
+    ax1.imshow(FinalBackground1,vmin=0,vmax=10.)
+    plt.title('Final Background method 1')
     plt.tight_layout()
     plt.show()
 
 
 
-    BackgSpecFinal=np.median(FinalBackground,axis=0) # median along the vertical
+    BackgSpecFinal1=np.median(FinalBackground1,axis=0) # median along the vertical
 
 
     fig, ax = plt.subplots(figsize=(20, 5))
-    ax.plot(BackgSpecFinal,color='r',label='Final Background')
+    ax.plot(BackgSpecFinal1,color='r',label='Final Background')
     plt.legend()
+    plt.title('Final Background method 1')
     #plt.ylim(0,4.5)
     plt.show()
 
+
+
+    # Background : method 2
+    #======================
+
+
+    wselbg2=5*wsel   # should be 100 in width
+
+    SelectedBackgroundUpRegion2=np.copy(rotated_image[imax-wsel-200: imax+wsel-200,:])
+    SelectedBackgroundDownRegion2=np.copy(rotated_image[imax-wsel+200: imax+wsel+200,:])
+    SelectedBackgroundMinRegion2=np.where(np.less_equal(SelectedBackgroundUpRegion2,SelectedBackgroundDownRegion2),SelectedBackgroundUpRegion2 , SelectedBackgroundDownRegion2)
+
+
+    BackgUp2=np.median(SelectedBackgroundUpRegion2,axis=0)  # median along the vertical
+    BackgDo2=np.median(SelectedBackgroundDownRegion2,axis=0) # median along the vertical
+    BackgMi2=np.median(SelectedBackgroundMinRegion2,axis=0) # median along the vertical
+
+    m1=np.median(BackgUp2)
+    m2=np.median(BackgDo2)
+    m0=np.median(BackgMi2)
+
+    BackgMi2=BackgMi2+ ((m1+m2)/2-m0)  # remove the bias induced by the min
+
+
+    fig, ax = plt.subplots(figsize=(20, 5))
+    ax.plot(BackgUp2,color='m',label='background from up band')
+    ax.plot(BackgDo2,color='b',label='background of down band')
+    ax.plot(BackgMi2,color='r',label='background of min band')
+    plt.ylim(0,4.5)
+    plt.legend()
+    plt.title('Final Background method 2')
+    plt.show()
+    
+    fig, ax = plt.subplots(figsize=(20, 5))
+    ax.plot(BackgMi2,color='r',label='background of min band')
+    plt.ylim(0,4.5)
+    plt.legend()
+    plt.title('Final Background method 2')
+    plt.show()
+    
+    
+    
+    
+    FinalBackground2=np.zeros(SelectedSpectrumRegion.shape)
+    FinalBackground2[:,0:FinalBackground2.shape[1]]=BackgMi2
+
+   # plot the final background region
+    # ---------------------------------------
+    fig, ax1 = plt.subplots(1,1,figsize=(20, 5))
+    ax1.imshow(FinalBackground2,vmin=0,vmax=10.)
+    #plt.tight_layout()
+    plt.title('Final Background method 2')
+    plt.show()
 #--------------------------------------------------------------------------------
 # Final spectrum
 
-    FinalSpectrumRegion=SelectedSpectrumRegion-FinalBackground
-
+    
+    if BackgroundSubtractionFlag1:
+        FinalSpectrumRegion=SelectedSpectrumRegion-FinalBackground1  # this is the 2D subtraction
+    elif BackgroundSubtractionFlag2:
+        FinalSpectrumRegion=SelectedSpectrumRegion-FinalBackground2  # this is the 2D subtraction
+    else:
+        FinalSpectrumRegion=SelectedSpectrumRegion
 
 
     # Check the FinalSpectrumRegion
@@ -781,7 +850,18 @@ if __name__ == '__main__':
 
 
 
-    fig, ax = plt.subplots(figsize=(20, 8))
+    fig, ax = plt.subplots(figsize=(10, 4))
+    ax.plot(spec1,color='r',label='left spectrum')
+    ax.plot(spec2,color='b',label='right spectrum')
+    plt.title(object_name)
+    plt.legend(loc='best')
+    plt.ylim(-50.,1500.)
+    plt.tight_layout()
+
+    # remove little star on spec2
+    spec2[1410:1450]=spec1[1410:1450]
+
+    fig, ax = plt.subplots(figsize=(10, 4))
     ax.plot(spec1,color='r',label='left spectrum')
     ax.plot(spec2,color='b',label='right spectrum')
     plt.title(object_name)
@@ -844,11 +924,11 @@ if __name__ == '__main__':
 
     # O2 Frauwnoffer A 759.370
     ax.plot([1315, 1315], [-200,2000], color='r', linestyle='-', linewidth=2)
-    ax.plot([1400, 1400], [-200,2000], color='r', linestyle='-', linewidth=2)
+    ax.plot([1365, 1365], [-200,2000], color='r', linestyle='-', linewidth=2)
 
     # H-alpha : Hα     656.281 nm
-    ax.plot([1120, 1120], [-200,2000], color='m', linestyle='-', linewidth=2)
-    ax.plot([1200, 1200], [-200,2000], color='m', linestyle='-', linewidth=2)
+    ax.plot([1140, 1140], [-200,2000], color='m', linestyle='-', linewidth=2)
+    ax.plot([1182, 1182], [-200,2000], color='m', linestyle='-', linewidth=2)
 
     # H-beta : Hβ     486.134 nm
     ax.plot([830, 830], [-200,2000], color='g', linestyle='-', linewidth=2)
@@ -860,11 +940,11 @@ if __name__ == '__main__':
 
 
     # H-delta : Hδ     410.175 nm
-    ax.plot([715, 715], [-200,2000], color='k', linestyle='-', linewidth=2)
+    ax.plot([716, 716], [-200,2000], color='k', linestyle='-', linewidth=2)
     ax.plot([740, 740], [-200,2000], color='k', linestyle='-', linewidth=2)
 
     # H-epsilon : H epsilon 397,0 nm
-    ax.plot([695, 695], [-200,2000], color='y', linestyle='-', linewidth=2)
+    ax.plot([693, 693], [-200,2000], color='y', linestyle='-', linewidth=2)
     ax.plot([710, 710], [-200,2000], color='y', linestyle='-', linewidth=2)
 
     plt.ylim(0.,2000.)
@@ -876,12 +956,12 @@ if __name__ == '__main__':
 # Wavelength calibration
 #--------------------------------------------------------------------------------
 
-    peak_O2=np.min(specsum[1315:1400])
+    peak_O2=np.min(specsum[1315:1365])
     indexes_O2=np.where(specsum==peak_O2)
     print indexes_O2, peak_O2
 
 
-    peak_Halpha=np.min(specsum[1120:1200])
+    peak_Halpha=np.min(specsum[1140:1182])
     indexes_Halpha=np.where(specsum==peak_Halpha)
     print indexes_Halpha, peak_Halpha
 
@@ -902,20 +982,27 @@ if __name__ == '__main__':
     print indexes_Hdelta, peak_Hdelta
 
 
-    peak_Hepsilon=np.min(specsum[695:710])
+    peak_Hepsilon=np.min(specsum[693:710])
     indexes_Hepsilon=np.where(specsum==peak_Hepsilon)
     print indexes_Hepsilon, peak_Hepsilon
 
 
     # X-axis of wavelength calibration line
-    pixel_axis=np.array([indexes_Hepsilon[0] ,indexes_Hdelta[0], indexes_Hgamma[0], indexes_Hbeta[0],indexes_Halpha[0], indexes_O2[0]])
+    pixel_axis=np.array([0,indexes_Hepsilon[0] ,indexes_Hdelta[0], indexes_Hgamma[0], indexes_Hbeta[0],indexes_Halpha[0], indexes_O2[0]])
 
     # Y-axis of wavelength calibration line
-    wavelength_axis=np.array([397.0, 410.175, 434.047,486.134, 656.281, 759.370])
+    wavelength_axis=np.array([0,397.0, 410.175, 434.047,486.134, 656.281, 759.370])
 
+    # for interpolation function
+    pixel_to_wavelength_fit_p1d=np.poly1d(np.polyfit(pixel_axis,wavelength_axis,1))
+    wavelength_to_pixel_fit_p1d =np.poly1d( np.polyfit(wavelength_axis,pixel_axis,1))
 
-
+    ### plot the calibration equation
     fig, ax = plt.subplots(figsize=(10, 10))
+    pt_XMIN=0
+    pt_XMAX=1500
+    pt_YMIN=pixel_to_wavelength_fit_p1d(pt_XMIN)
+    pt_YMAX=pixel_to_wavelength_fit_p1d(pt_XMAX)
     plt.plot(pixel_axis,wavelength_axis,'o-')
     plt.plot([0,1351],[0,759.370],'k-')
     plt.title('Ronchi Grating Calibration line')
@@ -935,29 +1022,34 @@ if __name__ == '__main__':
 #            arrowprops=dict(facecolor='black', shrink=0.02))
 
 
-
-
-
-
-
+    # old way with spline
+    # wrong way bad results
     pixel_to_wavelength_spl = UnivariateSpline(pixel_axis,wavelength_axis)
     wavelength_to_pixel_spl = UnivariateSpline(wavelength_axis,pixel_axis)
 
 
 
-    pixel_to_wavelength_spl(indexes_O2[0])
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    +++++++++++(indexes_O2[0])
     index_O2=np.where(specsum==peak_O2)
 
 
-    # fit for calibration line
 
-    #np.polyfit(pixel_axis[:,0],wavelength_axis,1,full=True)
-    np.polyfit(pixel_axis[:,0],wavelength_axis,1)
-
-
-    # get the wavelength array of same size as the spectrum
+    # get the wavelength array of same size as the spect*rum
     specsum_indexes=np.arange(specsum.shape[0])   
-    specsum_wavelength=pixel_to_wavelength_spl(specsum_indexes)
+    #specsum_wavelength=pixel_to_wavelength_spl(specsum_indexes)
+    specsum_wavelength=pixel_to_wavelength_fit_p1d(specsum_indexes)
 
 
     # Plot the calibrated experimental spectrum
@@ -988,10 +1080,10 @@ if __name__ == '__main__':
 #----------------------------------------------------------------------------------
 
     path_sed='../SED'
-    obj_name='hd158485'
-    airmass='1.1'
-    night_name='20160509'
-    tablefitsfile_sed='SEDPred_'+obj_name+'_'+night_name+'_'+str(fileindex)+'.fits'
+    obj_name_sed='hd158485'
+    #airmass='1.1'
+    #night_name='20160509'
+    tablefitsfile_sed='SEDPred_'+obj_name_sed+'_'+night_name+'_'+str(fileindex)+'.fits'
 
 
     # file of SED
@@ -1047,13 +1139,14 @@ if __name__ == '__main__':
     plt.plot(specsum_wavelength,specsum,label='data',color='b')
     plt.plot(wavelength_sed,SED5*3e14,label='predicted SED(ccd,atm,opt)',color='r')
     thetitle='Spectrum reconstructed with Monocam and Ronchi Grating for '+object_name
-    plt.title(thetitle,fontsize=30)
+    plt.title(thetitle,fontsize=25)
     plt.xlabel('$\lambda$ (nm)',fontsize=20)
     plt.ylabel(' flux in arbitrary units ',fontsize=20)
     ax.tick_params(axis='x', labelsize=20)
     ax.tick_params(axis='y', labelsize=20)
     plt.legend(loc='best')
     plt.xlim(0.,1000.)
+    plt.ylim(-10.,2000.)
     
     plt.savefig(fullspecfigfilename)
     plt.show()
